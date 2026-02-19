@@ -1,0 +1,659 @@
+
+% !TeX program = xelatex
+% !TEX root = main.tex
+% !TeX encoding = UTF-8
+\documentclass[10.5pt,compsoc]{CjC}
+%\usepackage{CJKutf8}
+%\usepackage{CJK}
+\usepackage{ifthen}
+\usepackage{graphicx}
+\usepackage{footmisc}
+\usepackage{subfigure}
+\usepackage{url}
+\usepackage{multirow}
+\usepackage[noadjust]{cite}
+\usepackage[colorlinks,linkcolor=blue,anchorcolor=blue,citecolor=blue]{hyperref}
+\usepackage{amsmath,amsthm}
+\usepackage{amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{color}
+\usepackage{ccaption}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage{xcolor,stfloats}
+\usepackage{comment}
+\setcounter{page}{1}
+\graphicspath{{figures/}}
+\usepackage{captionhack}
+\usepackage{epstopdf}
+%\usepackage{ccmap}
+%\CJKtilde
+%\usepackage{CJKpunct} 
+%\usepackage[lite,subscriptcorrection,slantedGreek,nofontinfo]{mtpro2}
+
+%===============================%
+
+%\firstfootname{ \quad \quad }
+\headevenname{\mbox{\quad} \hfill  \mbox{\zihao{-5}{\songti  计\quad \quad 算\quad \quad 机\quad \quad 学\quad \quad 报 } \hspace {50mm} \mbox{\songti  2019 年 }}}%
+\headoddname{\songti  ? 期 \hfill
+作者姓名等：论文题目 }%
+
+%footnote use of *
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\setcounter{footnote}{0}
+\renewcommand\footnotelayout{\zihao{5-}}
+
+\newtheoremstyle{mystyle}{0pt}{0pt}{\normalfont}{1em}{\bf}{}{1em}{}
+\theoremstyle{mystyle}
+\renewcommand\figurename{figure~}
+\renewcommand{\thesubfigure}{(\alph{subfigure})}
+\newcommand{\upcite}[1]{\textsuperscript{\cite{#1}}}
+\renewcommand{\labelenumi}{(\arabic{enumi})}
+\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
+\newcommand{\abc}{\color{white}\vrule width 2pt}
+\makeatletter
+\renewcommand{\@biblabel}[1]{[#1]\hfill}
+\makeatother
+\setlength\parindent{2em}
+%\renewcommand{\hth}{\heiti }
+%\renewcommand{\htss}{\begin{CJK*}{UTF8}{song}}
+
+
+\renewcommand{\refname}{\centering \bfseries 参~考~文~献 ~\\[-7mm]}
+\begin{document}
+\hyphenpenalty=50000
+\makeatletter
+\newcommand\mysmall{\@setfontsize\mysmall{7}{9.5}}
+\newenvironment{tablehere}
+  {\def\@captype{table}}
+
+\let\temp\footnote
+\renewcommand \footnote[1]{\temp{\zihao{-5}#1}}
+
+
+\thispagestyle{plain}%
+\thispagestyle{empty}%
+\pagestyle{CjCheadings}
+
+\begin{table*}[!t]
+\vspace {-13mm}
+\begin{tabular}{p{168mm}}
+\zihao{5-}
+\songti 
+第??卷\quad 第?期 \hfill 计\quad 算\quad 机\quad 学\quad 报\hfill Vol. ??  No. ?
+\zihao{5-}\songti  
+20??年?月 \hfill CHINESE JOURNAL OF COMPUTERS \hfill ???. 20?? \\
+\hline\\[-4.5mm]
+\hline\end{tabular}
+
+\centering
+\vspace{11mm}
+\heiti  
+{\zihao{2} 异步新闻驱动的因果分组股票走势预测网络}
+
+\vskip 5mm
+
+{\zihao{3} \fangsong 
+蒋文睿$^{1)}$\quad  刘海洋$^{1)}$ \quad 张勇强$^{1)}$ \quad 张文玉$^{1)}$ \quad 何昕达$^{1)}$ \quad 王晓康$^{1)}$
+ }
+
+\vspace{5mm}
+\zihao{6}{\songti 
+$^{1)}$(北京交通大学 计算机科学与技术学院, 北京市 中国 100044)
+ }
+
+% \zihao{6}{\songti  
+% $^{2)}$(单位全名 部门(系)全名, 市(或直辖市) 国家名
+% 邮政编码)*中英文单位名称、作者姓名须一致*}
+
+% \zihao{6}{\songti  
+% $^{3)}$(单位全名 部门(系)全名, 市(或直辖市) 国家名 邮政编码)
+%  }
+
+% \zihao{6}{\heiti 
+% 论文定稿后，作者署名、单位无特殊情况不能变更。若变更，须提交签章申请，国家名为中国可以不写，省会城市不写省的名称，其他国家必须写国家名。
+%  }
+
+\vskip 5mm
+{\centering
+\begin{tabular}{p{160mm}}
+\zihao{5-}{
+\setlength{\baselineskip}{16pt}\selectfont{
+\noindent\heiti 摘\quad 要\quad   \songti  
+股票价格走势预测是量化金融中的重要研究方向。近年来，越来越多的新闻文本数据被融入到股票预测模型之中，为传统的历史价格数据带来了额外的市场信号，有效提升了预测的准确率。然而，新闻在时序上呈现出异步异质性：既包含具有前瞻性的预警信号，也包含大量对市场既定波动的滞后性归因。如果笼统地将这两部分特性融入预测模型，则会产生冗余噪声污染。同时，股市中各支股票并非独立存在，多支股票的涨跌之间存在复杂的因果关系，已有研究表明融合因果发现策略能够进一步提升预测模型的性能和解释性。然而，股票数据维度高，对因果特征与价格特征联合建模需要高昂的计算成本，限制了其在实际场景中的应用。针对现有问题，本文提出了一种异步新闻驱动的因果分组股票预测网络（Causal Grouping Network for News-driven Stock Forecasting, CaGNet）。CaGNet引入双向新闻注意力异步对齐机制，通过引入局部时间掩码，允许模型自适应地在历史价格和新闻之间建立非对称关联；并借助分组策略对股票间的因果特征进行建模，大幅降低了联合建模的开销，实现了效率和精度的平衡。实验结果表明，CaGNet在多个数据集上实现了最优的预测性能，同时优化了因果计算的复杂度，为实时金融预测场景的应用提供了一种新的可能
+
+ \par}}\\[2mm]
+
+\zihao{5-}{\noindent
+\heiti 关键词  \quad \songti  {股票走势预测，格兰杰因果关系，双向新闻驱动，分组策略，时间序列  }
+ 
+}\\[2mm]
+\zihao{5-}{\heiti 中图法分类号 	\songti  
+TP \rm{\quad \quad \quad     }
+\heiti DOI号: \songti  
+*投稿时不提供DOI号 }
+\end{tabular}}
+
+\vskip 7mm
+
+\begin{center}
+\zihao{3}{ {\heiti Causal Grouping Network for News-driven Stock Forecasting }}\\
+\vspace {5mm}
+\zihao{5}{ {\heiti JIANG Wen-Rui$^{1)}$\quad LIU Hai-Yang$^{1)}$\quad ZHANG Yong-Qiang$^{1)}$\quad ZHANG Wen-Yu$^{1)}$\quad HE Xin-Da$^{1)}$\quad WANG Xiao-Kang$^{1)}$
+}}\\
+\vspace {2mm}
+\zihao{6}{\heiti {$^{1)}$(School of Computer and Information Technology, Beijing Jiaotong University, Beijing 100044, China)} }
+
+
+
+\end{center}
+
+\begin{tabular}{p{160mm}}
+\zihao{5}{
+\setlength{\baselineskip}{18pt}\selectfont{
+{\bf Abstract}\quad \begin{heiti} (\textbf{500英文单词，内容包含中文摘要的内容}).
+字体为Times new Roman,字号5号* Abstract \end{heiti}
+\par}}\\
+
+\setlength{\baselineskip}{18pt}\selectfont{
+\zihao{5}{\noindent  Stock price trend forecasting is a significant research area in quantitative finance. In recent years, increasing amounts of news text data have been incorporated into stock prediction models, providing additional market signals beyond traditional historical price data and effectively enhancing prediction accuracy. However, news exhibits temporal asynchrony and heterogeneity: it contains both forward-looking warning signals and a large volume of lagging attributions to established market fluctuations. Incorporating both characteristics indiscriminately into prediction models generates redundant noise pollution. Furthermore, individual stocks in the market are not isolated entities; complex causal relationships exist between the price movements of multiple stocks. Existing research indicates that integrating causal discovery strategies can further enhance the performance and interpretability of prediction models. However, stock data is highly dimensional, and jointly modeling causal features with price features incurs high computational costs, limiting its practical application. To address these challenges, this paper proposes the Causal Grouping Network for News-driven Stock Forecasting (CaGNet). CaGNet introduces a bidirectional news attention asynchronous alignment mechanism. By incorporating local temporal masks, it enables the model to adaptively establish asymmetric associations between historical prices and news. Additionally, it employs a grouping strategy to model causal features across stocks, significantly reducing the computational overhead of joint modeling and achieving a balance between efficiency and accuracy. Experimental results demonstrate that CaGNet achieves optimal forecasting performance across multiple datasets while optimizing causal computation complexity, offering a novel approach for real-time financial forecasting applications.
+
+\vspace {5mm}
+{\bf Keywords}\quad \heiti Stock trend prediction; Granger causality; Bidirectional news driver; Grouping strategy; Time series }\par}
+\end{tabular}
+
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{p{0.05cm}p{16.15cm}}
+\multicolumn{2}{l}{\rule[4mm]{40mm}{0.1mm}}\\[-3mm]
+&\begin{songti}
+收稿日期：\quad \quad -\quad -\quad ；最终修改稿收到日期：\quad \quad -\quad -\quad .*投稿时不填写此项*. 本课题得到… …基金中文完整名称(No.项目号)、… …基金中文完整名称(No.项目号)、… … 基金中文完整名称(No.项目号)资助.作者名1(通信作者)，性别，xxxx年生，学位(或目前学历)，职称，是/否计算机学会(CCF)会员（提供会员号),主要研究领域为*****、****.E-mail: **************.作者名2（通信作者)，性别，xxxx年生，学位(或目前学历)，职称，是/否计算机学会(CCF)会员（提供会员号),主要研究领域为*****、****.E-mail: **************. 作者名3（通信作者)，性别，xxxx年生，学位(或目前学历)，职称，是/否计算机学会(CCF)会员（提供会员号),主要研究领域为*****、****.E-mail: **************.(给出的电子邮件地址应不会因出国、毕业、更换工作单位等原因而变动。请给出所有作者的电子邮件)
+第1作者手机号码(投稿时必须提供，以便紧急联系，发表时会删除): … …, E-mail: … …*此部分6号宋体*
+\end{songti}
+\end{tabular}\end{table*}
+\clearpage\clearpage
+    \linespread{1.15}
+\heiti 
+\zihao{5}
+\vskip 1mm
+\section{引言}
+\songti 
+股票价格走势预测一直是金融研究与量化投资领域的重要课题。它能帮助投资者进行理性的决策，从而获得更高的收益。然而，股票市场是一个复杂的系统。股价的变化受制于公司的经营状况，政策法规的变化，投资者的情绪和社会舆论等诸多因素。
+
+早期研究基于股票数据以及影响因子建模预测模型\cite{sunny2020deep}\cite{wang2020forecasting}，然而近年来研究者们发现仅通过公开数据难以捕捉市场突发性变化，因此学者们尝试通过结合新闻数据和社交媒体论坛等非结构化数据来捕捉市场情绪，从而提升股票走势预测精度\cite{jing2021hybrid}。尽管这些方法取得一定效果，但受制于新闻数据的噪声和情感波动性，以及选取新闻数据的主观性，股票走势预测模型的泛化性难以保证\cite{saberironaghi2025stock}。同时，新闻数据具有异步异质性，使得对价格的影响有预测性和解释性之分\cite{li2023pen}。预测性新闻发生在股票价格变动之前，例如某家公司发布季度财报显示利润大幅超出市场预期，这样的利好消息往往能够在一段时间内推动价格的上涨，并可能通过市场联动对相关股票的价格走势产生延迟影响。相反，解释性新闻发生在价格变动之后，主要用于解释市场波动的原因，如已经强制平仓事件的解读和资金流向的复盘等。这两类新闻在时间维度上具有显著差异：预测性新闻提供了前瞻性信号，而解释性新闻更多地反映事后情绪与舆论反馈。然而现有研究大多遵循“同步对齐”假设，即认为新闻发布均领先于价格波动。若模型未能识别两种不同类别的信号加以区分，会因误用“滞后信息”引入冗余噪声，损害预测的真实性。因此，实现异步对齐对于提升预测精度至关重要。
+
+因果关系作为一种具有方向性的非对称关系，能够很好的揭示出股票之间潜在的依赖结构和信息传递路径，能够有效区分“相关”与“因果”带来的混淆效应，是一种更先进的解释系统\cite{li2024causalstock}。近年来的研究表明，在股票走势预测中引入因果结构不仅能够提升预测准确率，还能帮助理解市场动态背后的驱动机制\cite{wang2024ensemble}\cite{liang2024dynamic}\cite{xu2025causal}。但是，现有的模型往往通过直接将因果图与价格特征进行联合建模来实现这一目标。这样的方法时间复杂度高，计算开销大。另外，传统因果图采用静态图，忽略了现实中复杂、不断变化、非线性的因果关系\cite{nam2019financial}。因此，如何在保持因果建模的解释性优势的同时，增加动态性并有效降低联合建模的复杂度，成为当前因果驱动股票预测研究中的关键挑战。
+
+为了解决这些问题，我们提出了一种名为异步新闻驱动的分组因果股票预测网络CaGNet（Causal Grouping Network for News-driven Stock Forecasting）。它能够利用公开股票数据信息，结合新闻文本等辅助信息，建模高维股票数据的因果关系，提高股票走势预测精度。在CaGNet模型中，为了准确识别新闻的信息传递方向，我们设计了新闻双向驱动器 (Bidirectional News Driver, BiND），使用时间掩码在局部时间窗口内对新闻与价格进行动态匹配，识别冗余信号特征，提高预测精度。我们还提出了层次化动态分组策略（Dynamic Grouping Strategy, DGS），受金融市场板块联动效应的启发，该策略以行业板块知识为先验基础，或根据相关性特征自适应地聚类分组，通过代表股票机制将组间因果推断简化为代表元之间的交互。利用分块对角矩阵与广播机制，从小因果合成大因果，最终细化到个体股票之间的因果关系，大幅降低了高维时间序列因果关系发现的计算开销。
+
+本文的主要贡献如下所述：
+\begin{enumerate}
+\item 提出了新闻异步对齐的新视角，识别并量化了新闻流中的时间异质性，通过注意力机制以及掩码约束，匹配不同时间步的新闻和价格特征，降低了新闻中冗余信号对预测决策的干扰。
+\item 提出了一种板块感知的分组因果发现策略，通过分组计算与广播融合的策略，实现了大规模股票网络细粒度的动态因果图的高效构建，突破了传统方法在扩展性上的限制。
+\item 在多个真实股票数据集上验证了提出模型的有效性，覆盖了中美两国股票市场，并进一步区分了不同交易所与市场结构。同先进的基线方法作比较，证明了模型的先进性和股票预测的有效性。
+\end{enumerate}
+
+\section{相关工作}
+\songti 
+在早期，股票价格走势预测主要借助技术分析\cite{luo2023causality}，即利用历史行情数据和技术指标进行建模。许多研究采用循环神经网络等深度学习方法挖掘股价时间历史序列，例如利用长短期记忆网络（LSTM）\cite{sunny2020deep}\cite{tang2024stock}结合双重注意力机制捕捉关键走势（ALSTM）\cite{wang2021forecasting}以及通过对抗训练增强模型鲁棒性来模拟价格波动（Adv-ALSTM）\cite{feng2018enhancing}。还有的方法融合技术指标因子与股价序列数据，如将动态因子模型与变分自编码器结合来提取潜在因子，从而在一定程度上缓解金融时序数据中的高噪声和低信噪比问题\cite{duan2022factorvae}。然而，由于缺乏对外部事件和市场情绪的信息，当突发新闻等因素主导市场时其预测往往出现偏差。
+
+随着自然语言技术的发展和成熟，研究者意识到与股票相关的新闻文本信息，如社交媒体评论和新闻报道，也可以用于股价走势预测。早期的文本驱动方法往往通过情感分析等手段从新闻中提取投资者情绪信号，弥补纯价格模型无法获取的新信息。例如，有研究采用层次化注意力网络识别时间序列中具有影响力的新闻事件\cite{liu2018hierarchical}\cite{huang2020hierarchical}\cite{zhao2024dynamic}，或构建深度生成模型来刻画新闻事件对市场潜在状态的影响\cite{gu2023stock}\cite{rakesh2018linked}。纯基于文本的信息可以在一定程度上预示市场对未来事件的反应，但单独依赖新闻也存在局限：文本数据噪声高、冗余信息多，且模型可能忽略了市场自身的趋势基准，因此，近年来兴起了将新闻文本与历史价格数据相融合的多模态预测方法。例如，PEN\cite{li2023pen}模型通过共享表示学习同时建模文本语义与价格时序的交互影响。
+
+近年来，股票走势预测领域开始引入因果建模方法，以捕捉股票之间信息传递的方向性影响，从而提升预测精度。传统多股票模型往往依赖于相关性（如基于注意力机制或价格相关矩阵）来表示股票间关系，但相关关系通常是对称的，无法区分“因”与“果”\cite{xu2025causal}。 MagicNet\cite{luo2025magicnet}、 CausalStock\cite{li2024causalstock}、CMIN\cite{luo2023causality}方法结合了新闻文本和因果关系建模。MagicNet 构建了一个动态交互因果图来表示多只股票之间的因果关联。CausalStock设计了时滞依赖的因果发现模块。这些策略显著提升了模型的预测准确率，但它们普遍采用全量因果图建模。这种全图建模在股票维度较高时带来了巨大的计算开销和推理复杂度：因果矩阵的规模随股票数呈平方增长，计算一次完整因果图就需要遍历所有股票对，因果发现过程常耗时较长。
+
+随着大语言模型（LLMs）的飞速发展，金融预测领域出现了一种利用生成式预训练模型处理非结构化新闻并直接进行趋势推理的新范式。代表性工作如 LLMFactor\cite{wang2024llmfactor}引入了顺序知识引导提示（SKGP）框架，试图通过 Prompt 工程从原始新闻中直接抽取的语义因子以替代传统的词嵌入特征。虽然此类方法凭借 LLMs 出色的自然语言理解能力能够生成具有高度可读性的决策解释，但LLMs 的本质仍是基于概率分布的文本补全，其生成的金融逻辑往往缺乏像 Granger因果这样严谨的数学验证。此外，由于 LLMs 的预训练语料库规模巨大且覆盖面广，其内部参数极可能包含了测试集时间段内的市场演变信息，造成数据泄露风险与前视偏差，导致实验精度虚高。
+
+尽管现有研究已从新闻驱动建模和因果关系建模等角度对股票预测问题进行了大量探索，但是据我们所知，目前尚未有工作探究新闻方向性约束以及大规模因果计算效率优化。在接下来的部分中，本文将描述新闻双向驱动器和因果分组框策略是如何设计的，并探讨它们的优势。
+
+\section{方法}
+本章将详细介绍CaGNet的整体结构与关键组成模块的设计与实现细节。作为一种统一的端到端预测模型，CaGNet通过多模态并行建模、因果关系增强以及跨模态交互机制，刻画了新闻与价格序列之间的复杂依赖关系。
+
+\subsection{总体模型结构}
+CaGNet的总体架构如图\ref{fig:modeloverview}所示，主要由三个模块组成，分别是文本价格双流嵌入网络，因果增强网络，新闻双向驱动器。
+
+双流嵌入网络并行编码新闻文本和价格序列，将多模态信息映射至统一的潜在语义空间，为后续处理提供基础特征。
+
+因果增强网络使用动态窗口策略和分组策略进行因果关系捕捉，发现股票之间的因果关系，形成因果特征，并指导文本和价格特征的异步对齐。
+
+新闻双向驱动器在时间维度上对齐并交互融合新闻特征与价格序列，新闻事件驱动价格序列的更新，同时价格走势的上下文亦能反馈调整新闻信息的解读。
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=\textwidth]{img/modeloverview.png}
+    \caption{本文提出的模型总体架构图。它由三部分组成：(a) 双流嵌入网络，(b) 因果增强网络，(c) 新闻双向驱动器。}
+    \label{fig:modeloverview}
+\end{figure*}
+
+\subsection{双流嵌入网络}
+
+\subsubsection{文本处理}
+双流嵌入网络将文本和价格分别嵌入到独立的向量空间中，形成文本向量与价格向量。该网络接受文本数据$W \in \mathbb{R}^{B \times T \times M \times L}$作为输入，其中$B$表示批量大小，$T$表示交易日数（不同股票的交易日数有所不同，需要考虑休市、停牌以及上市时间不同等情况），$M$表示每个交易日输入的新闻条数，$L$表示每条消息最多包含的词数。随后我们使用一个词嵌入层将离散的词索引映射到连续向量空间。嵌入层采用预训练的GloVe\cite{pennington2014glove}词嵌入矩阵进行初始化，并在端到端训练过程中进一步微调，其过程可以表示为：
+\begin{equation}
+  E_{word} = \operatorname{Embedding}(W) \in \mathbb{R}^{B \times T \times M \times L \times d_w}
+  \label{eq:word_embedding}
+\end{equation}
+其中$d_w$为词向量维度，$M$代表当日接受多少条新闻作为输入。
+
+为了捕捉消息序列中前后文依赖关系，需要对词嵌入进一步处理得到消息嵌入。词向量通过双向门控循环单元（Bidirectional Gated Recurrent Unit, BiGRU）提取上下文依赖，生成单条消息嵌入$E_{msg}^{(t)}$：
+\begin{equation}
+\begin{split}
+  \mathbf{h}_{fwd}^{(t)} &= \operatorname{GRU}_{fwd}(E_{word}^{(t)}) \\
+  \mathbf{h}_{bwd}^{(t)} &= \operatorname{GRU}_{bwd}(\operatorname{flip}(E_{word}^{(t)})) \\
+  E_{msg}^{(t)} &= \frac{\mathbf{h}_{fwd}^{(t)} + \mathbf{h}_{bwd}^{(t)}}{2} \in \mathbb{R}^{B \times L \times M \times d_m}
+\end{split}
+\label{eq:bigru_encoding}
+\end{equation}
+其中$d_m$是消息向量的表示维度。
+
+考虑到单只股票在同一交易日内可能受到多条重要性不等的新闻冲击，对于第$t$天的所有新闻消息，我们利用消息级注意力对高维文本的嵌入特征进行加权聚合，突出当天新闻消息总体对股价走势的预测走向，这个过程表示为：
+\begin{equation}
+\begin{aligned}
+u_t &= w^\top \tanh(W M_{msg}) \\
+\alpha_t &= \text{softmax}(u_t) \\
+c_t &= M_{msg} \alpha_t^\top \\
+E'_{msg} &= \sum \alpha_t E_{msg}
+\end{aligned}
+\end{equation}
+聚合后的$E'_{msg} \in \mathbb{R}^{B \times T \times d}$作为日级新闻语义表示，并输入后续模块与价格特征进行融合。
+
+\subsubsection{特征拼接}
+输入的价格数据$P \in \mathbb{R}^{T \times 7}$，包括开盘价、最高价、最低价、收盘价、调整收盘价、成交量。经过归一化处理后，保留开盘价，最高价和调整收盘价三个维度，并对价格特征进行映射，获得其潜在空间表示用于与新闻语义向量融合：
+\begin{equation}
+\begin{aligned}
+P &= [p_1, p_2, \dots, p_T] \in \mathbb{R}^{T \times 6} \\
+P' &= \text{Linear}(P) \in \mathbb{R}^{T \times d_2}
+\end{aligned}
+\end{equation}
+为了体现市场的联合特征，我们将新闻语料的嵌入向量，和价格时间序列的潜空间表示，在特征维度进行简单拼接：
+\begin{equation}
+X = [E_{msg}; P'], \quad X \in \mathbb{R}^{T \times (d + d_2)}
+\end{equation}
+联合特征$X$用于后续的变分运动解码，以捕获跨模态的时序依赖关系。
+
+\subsubsection{变分运动网络}
+为了在后续的异步注意力机制中准确建模多模态特征，我们使用变分运动网络对先前的联合时间序列$X$构建隐变量特征，便于后续多模态特征对齐。
+设输入序列为$X = [x_1, x_2, \dots, x_T]$，采用LSTM网络或者GRU网络将观测序列映射到隐变量
+\begin{equation}
+h_t = f(x_t, h_{t-1})
+\end{equation}
+引入变分推断结构，对每个$h_t$估计一个高斯分布：
+\begin{equation}
+z_t \sim \mathcal{N}(\mu_t, \sigma_t^2)
+\end{equation}
+通过重参数采样，生成潜在的运动特征$g_t$
+\begin{equation}
+\begin{aligned}
+z_t &= \mu_t + \sigma_t \epsilon_t \\
+g_t &= \tanh(\text{Linear}([h_t, z_t]))
+\end{aligned}
+\end{equation}
+其中$\epsilon_t \sim \mathcal{N}(0, I)$得到连续隐空间表示。
+
+
+\subsection{因果增强网络}
+在金融市场中，单个股票的波动往往并非孤立事件，而是受到跨股票因果溢出效应（Causal Spillover Effects）的驱动。然而，对全量股票构建动态因果网络面临巨大的计算挑战。为此，本章提出因果增强网络（Causal-Enhanced Network），旨在通过层次化的因果分组发现策略，在大幅降低计算开销的同时，提取因果表征，并将其注入后续的预测框架中。
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=1\linewidth]{img/causal.png}
+    \caption{因果分组策略与动态因果关系建模示意图}
+    \label{fig:causal}
+\end{figure*}
+
+\subsubsection{分组策略}
+受到“先局部，后整体”的优化思想的启发，我们提出了基于分组融合的因果发现策略。针对全量股票构建动态因果网络通常面临$O(N^2)$级别的计算开销，而通过分组策略，能够大幅降低因果发现的计算复杂度，并给高频的动态因果关系更新提供了可能。
+
+股票市场本身有板块和市场的概念，一种方法是在模型训练之前，提前准备股票所在板块的先验信息，例如：苹果公司（AAPL）属于科技股。另一种方法是根据收益率相关性进行分组，具体的策略是：对于输入的股票价格数据$P$，以股票价格收益率构建相关性分组，进行层次聚类（Hierarchical Clustering, HC）得到彼此独立的分组。
+\begin{equation}
+\begin{aligned}
+R &= \text{corr}(\Delta P) \in \mathbb{R}^{N \times N} \\
+G &= \text{HC}(R, C) \in \mathbb{R}^N
+\end{aligned}
+\end{equation}
+其中，$\Delta P$表示收益率，$R$表示股票间的相关性矩阵，$C$表示分组数量，$G$表示每个股票对应的组别编号。
+
+在本研究中，股票分组基于全样本阶段的收益率相关性计算得到，用于反映股票间长期的相关性特征。这种全样本分组方法捕捉的是行业属性、风险暴露及市场风格等不随短期波动而剧烈变化的结构性特征，作为一种先验结构被引入，用于构建股票间的图结构与因果关系约束。该相关性计算结果并未直接参与预测阶段的特征更新，而是提供了一个全局稳定的结构参考。若应用于在线预测场景，则可采用滑动窗口计算相关性矩阵以避免潜在的数据泄露问题。
+
+设共有$C$个分组、$N$只股票，每只股票仅属于某一个分组，则分组情况以矩阵的形式记录为：
+\begin{equation}
+G = [g_{ki}] \in \{0, 1\}^{C \times N}
+\end{equation}
+其中如果第$i$支股票属于第$k$个组，则$g_{ki} = 1$。
+
+\subsubsection{动态因果计算}
+在股票系统中，不同股票之间的依赖关系往往会随时间变化而变化，因此需采用动态因果计算的方式。但动态因果计算方式这也带来更高的计算开销。为了刻画股票数据在不同时间尺度下的特征，得益于先前的分组策略，我们使用层次化因果近似全量因果关系。
+
+本文选用最经典的Granger因果关系，类似地，还可以使用不同的因果关系计算方法，比如传递熵和基于信息论的方法。经典的Granger因果关系使用向量自回归模型来表示时间依赖关系：假设有两个时间序列$X$和$Y$，如果加入时间序列$Y$的历史信息能够显著提升对序列$X$的预测准确性，则称$Y$对$X$有Granger因果。具体来说，$X$和$Y$表示如下：
+\begin{equation}
+\begin{aligned}
+X_t &= \sum_{k=1}^p a_k X_{t-k} + \sum_{k=1}^p b_k Y_{t-k} + \varepsilon_t \\
+Y_t &= \sum_{k=1}^p c_k X_{t-k} + \sum_{k=1}^p d_k Y_{t-k} + \eta_t
+\end{aligned}
+\end{equation}
+指定一段时间窗口$l$，加入$Y$的历史值能够降低对$X$的最优预测误差方差，即
+\begin{equation}
+\sigma^2 (X \mid X_{\text{past}}) > \sigma^2 (X \mid X_{\text{past}}, Y_{\text{past}})
+\end{equation}
+则说明$Y$对$X$在该时间段存在因果贡献。
+
+基于预测误差的降低幅度，可以构造连续型Granger因果强度指标：
+\begin{equation}
+G_{Y \to X} = \frac{\sigma^2 (X \mid X_{\text{past}}) - \sigma^2 (X \mid X_{\text{past}}, Y_{\text{past}})}{\sigma^2 (X \mid X_{\text{past}})}
+\end{equation}
+$G$取值范围为$[0, 1]$，表示因果影响程度。
+
+本文在每个滑动窗口中，对同组内所有股票对$(i, j)$计算局部Granger因果强度$G$，构造分块对角矩阵，并最终得出组内因果强度矩阵$A_{\text{intra}}$：
+\begin{equation}
+\begin{aligned}
+G_t &= G(x_i, x_j; t) \\
+A_{\text{intra}} &= \text{diag}(G_t^{(1)}, G_t^{(2)}, \dots, G_t^{(C)}) \in \mathbb{R}^{N \times N}
+\end{aligned}
+\end{equation}
+其中，$t$表示在以时间$t$为末尾，窗口大小为$l$的局部窗口。
+
+根据选定阈值获取Granger因果图或以对应的因果强度构建因果图。
+\begin{equation}
+A_{ij}^{(t)} = \begin{cases} 1, & G_{i \leftarrow j}^{(t)} > th \\ 0, & \text{otherwise} \end{cases} \in \{0, 1\}^{N \times N}
+\end{equation}
+其中，$th$代表对应阈值。
+
+若直接对所有股票对进行Granger测试，则在整个市场范围内需要进行$O(N^2)$级别的Granger判别，计算量巨大。为此，我们设计了一种基于“代表股票”的组间因果近似策略。根据分组情况，对于任意两个分组$G_k$与$G_l$，我们选择每一组中与股票$i$相关性最高的股票$j$，对其进行Granger因果检验用来代表组间因果关系，组间因果矩阵可表示为：
+\begin{equation}
+\begin{aligned}
+q_{kl} &= G(x_{i(k,l)}, x_{j(k,l)}; t) \\
+Q &= [q_{kl}] \in \mathbb{R}^{C \times C}
+\end{aligned}
+\end{equation}
+组间的宏观因果信息需要向微观股票进行传递。我们认为，股票和股票的因果关系需要继承组间因果关系。因此，模型使用隶属度矩阵$G$将组间关系广播至全量空间，最终构建全量动态因果图$\tilde{M}$：
+\begin{equation}
+\tilde{M} = A_{\text{intra}} + \lambda (G^\top Q G) \in \mathbb{R}^{N \times N}
+\end{equation}
+上述过程中，由于每对分组仅需一次Granger测试，当分组数量$C$远小于股票数量$N$时，这种近似策略能够显著减少总体计算量。上述步骤会在所有滑动窗口上重复执行，从而得到一段时间内的因果图序列。
+
+\subsubsection{因果特征提取}
+为了将推断得到的动态因果图$\tilde{M}$有效整合至预测框架中，需将其从高维拓扑表示转换为适合深度神经网络处理的低维连续向量。对任意股票$i$，其在市场中的因果角色可由其对其他股票的施加影响与受其他股票的被动影响共同刻画。具体而言，我们取出$\tilde{M}_{i,:}^{(t)}$第$i$行表示股票$i$对其他股票的影响，以及$\tilde{M}_{:,i}^{(t)}$第$i$列表示其他股票对股票$i$的影响，通过链接操作，构建一个长度为$2N$的局部因果向量$c_i^{(t)}$
+\begin{equation}
+c_i^{(t)} = f([\tilde{M}_{i,:}^{(t)}; \quad \tilde{M}_{:,i}^{(t)}])
+\end{equation}
+由于原始因果矩阵有较高的维度与稀疏性，直接使用全量信息会显著增加模型复杂度，并可能导致过拟合。我们在此进行嵌入化处理，压缩成固定维度$d_c$的特征向量$c_i^{(t)}$，在保持模型整体拓扑关系的同时，兼具计算效率和泛化能力，为后续联合预测提供合适的数据形式。最终得到的因果特征形式如$c = [c_1, c_2, \dots, c_n]$。
+
+学习到的因果特征$c$被注入到3.4节的异步注意力机制中：
+\begin{equation}
+V = [P', c] W_v
+\end{equation}
+\subsection{新闻双向驱动器}
+与以往直接拼接多模态特征的方法不同，本研究在多模态融合时引入了一个新闻双向驱动器（Bidirectional News Driver, BiND），一种注意力机制的异步对齐方法。由于新闻具有异质性的特点，新闻信息和价格变化在时间上并不完全匹配。然而传统的预测模型假定新闻领先于价格波动，这些方法将“滞后解释”理解成“预测信号”，从而引入冗余噪声。因此，我们设计了该模块，使模型能够在动态窗口内自适应地匹配新闻特征与价格波动。
+
+在注意力机制框架下，我们将新闻特征映射为查询向量（Query），将历史价格特征映射为键向量（Key）与值向量（Value）。注意力公式如下：
+\begin{equation}
+\begin{aligned}
+Q &= X' W_q \\
+K &= P' W_k \\
+V &= P' W_v
+\end{aligned}
+\end{equation}
+其中$W_q, W_k, W_v$为可学习参数矩阵。在因果增强模式下，$V = [P', c] W_v$。
+
+注意力得分矩阵$S$体现不同时刻新闻对股价变动的时间相关性，其计算公式为：
+\begin{equation}
+S = \frac{QK^\top}{\sqrt{d_a}}
+\end{equation}
+
+与标准注意力不同，我们为注意力分数添加了局部时间掩码（mask），限制了新闻只能关注一定窗口内的价格段。多数新闻相关的市场反应都集中在其发布后的1~2天内，因此我们设计模型需满足“新闻在一定窗口内生效”的金融假设。
+
+值得注意的是，在推理预测和测试阶段，由于现实世界不可能预知未来新闻，我们改变我们的参数使得$\tau_n = 0$。这样新闻仅保留过去的窗口，从而避免数据泄露。掩码部分的公式可以表示为：
+\begin{equation}
+M_{b,i,j} = \begin{cases} 1, & j \in [i - \tau_p, i + \tau_n] \\ 0, & \text{otherwise} \end{cases}
+\end{equation}
+其中，$M$表示掩码，$b$表示样本数，$i$是当前时间步，$j$是被关注时间步，$\tau_p$是允许回看的最大天数，$\tau_n$是允许前看的最大天数。
+
+该机制不仅自动学习“哪些新闻是相关的”，“哪些特征是冗余的”，还通过掩码约束了“哪些时间点的新闻是合法可用的”，从而保证了因果顺序和时间逻辑的合理性。
+
+当$M_{b,i,j} = 0$时，对应位置的注意力分数$S_{i,j}$会被置为$-\infty$，从而在Softmax后归零；通过掩码后的注意力权重与残差连接，我们得到对齐后的新闻表征：
+\begin{equation}
+E_{msg}^{\text{aligned}} = \text{Linear}(\text{Softmax}(\text{Mask}(S, M))V + E_{msg})
+\end{equation}
+
+\subsection{解码预测层}
+在获取跨模态的表征后，模型需对多源信号进行集成以实现最终预测。我们将反映价格序列趋势的运动特征$g_t \in \mathbb{R}^{d_g}$与异步融合特征$E_{msg}^{\text{aligned}}$和因果特征$c$进行级联，形成统一的向量表示$z_t = [g_t; E_{msg}^{\text{aligned}}; c]$。
+
+融合后的特征经由一层线性映射与非线性激活函数进行变换：
+\begin{equation}
+\tilde{z}_t = \tanh(W_z z_t + b_z)
+\end{equation}
+最后通过前馈神经网络解码，解码器通过线性投影与Softmax归一化，生成股票最终的涨跌类别的概率分布$\hat{y}$：
+\begin{equation}
+\hat{y}_t = \text{Softmax}(W_y \tilde{z}_t + b_y)
+\end{equation}
+
+\subsection{训练目标}
+我们的训练目标是最小化一个由分类损失和变分约束构成的复合损失函数。分类损失旨在衡量预测的标签和真实标签之间的差异：对于预测时刻$T$，采用交叉熵损失来衡量预测分布$\hat{y}_T$与真实分布$y_T$之间的差异，其中，$\hat{y}_T$是预测标签，$y_T$是真实标签，
+\begin{equation}
+L_T = -y_T^\top \log \hat{y}_T
+\end{equation}
+其中$y_T, \hat{y}_T \in \mathbb{R}^C$，$C$是预测类别数。
+
+我们用KL散度损失衡量变分运动网络的学习能力，为避免在训练早期KL项主导损失导致模型坍塌，引入退火权重$\lambda_{KL}(t)$动态平衡似然项与KL项的贡献
+\begin{equation}
+\begin{aligned}
+L_{KL} &= \sum_{i,t} \text{KL} (\mathcal{N}(\mu_{\text{post}}, \sigma_{\text{post}}^2) \parallel \mathcal{N}(\mu_{\text{prior}}, \sigma_{\text{prior}}^2)) \\
+\lambda_{KL}(t) &= \begin{cases} 0, & t < t_{\text{start}} \\ \lambda_{\text{const}}, & \text{if constant} \\ \min(\beta \cdot g, 1), & \text{otherwise} \end{cases}
+\end{aligned}
+\end{equation}
+最终的联合训练目标表示为：
+\begin{equation}
+L_{\text{Total}} = L_T + \lambda_{KL}(t) L_{KL}
+\end{equation}
+
+\section{实验}
+在这一部分，我们对CaGNet方法和其他的基线方法进行实验对比。在不同的股票市场数据集中进行验证，以展示本文提出方法的有效性。
+
+\subsection{数据集}
+我们的实验使用了六个数据集，ACL18、CMIN-US、CMIN-CN、BIGDATA22、CIKM18和我们自建的BSE数据集。这些数据集分别来自不同的股票市场（如中国A股市场或美国市场），每个数据集内部仅包含同一市场的股票。
+
+\begin{itemize}
+\item \textbf{ACL18} [26]：最早的股票数据走势任务的数据集，包含来自美国股市的87只股票的数据，涵盖9个行业。时间跨度从2014年1月1号到2016年1月1号。
+\item \textbf{CMIN-US} [16]：作为一个新的基准数据集，CMIN-US包含美国市值排名前110的股票，覆盖的时间范围为2018年1月1日至2021年12月31日。该数据集包括财经新闻文本和历史股价数据。股价数据来自Yahoo Finance，而文本数据来自Yahoo Finance的新闻标题。
+\item \textbf{CMIN-CN} [16]：该数据集包含CSI300指数（中国主要股市指数）中所有300只成分股的数据，时间范围与CMIN-US相同。与CMIN-US类似，它包含财经新闻文本和历史股价数据，其中股价数据同样来自Yahoo Finance，而文本数据则来自Wind数据库。
+\item \textbf{BIGDATA22} [27]：该数据集涵盖了美股50只股票，时间跨度为2019年7月至2020年6月。这是一个小规模数据集。文本新闻来源于公开金融新闻API。
+\item \textbf{CIKM18} [28]：从美国股票市场中选取了47支股票，时间跨度从2017年1月到2017年11月。股价数据来自Yahoo Finance，新闻数据来源于Twitter。
+\item \textbf{BSE}：从中国股票市场，北京证券交易所，选取了269支股票，时间跨度从2022年1月到2025年9月。股价数据和新闻数据均来自于wind数据库。我们的数据集开源在：\url{https://drive.google.com/drive/folders/1choUmpayEmBiQhCyayvdvQkdaK3JvfOh?usp=sharing}
+\end{itemize}
+
+为了确保实验结果的稳定性与可复现性，我们对所有数据集采用一致的数据划分策略。具体而言，每个数据集均按照时间顺序划分为训练集、验证集与测试集，所有报告的实验结果均基于10次不同随机种子在测试集上的运行结果取平均值。
+
+\begin{table}[t]
+  \caption{Summary of Basic Statistics of Datasets}
+  \label{tab:datasets}
+  % 如果表格太宽超出单栏边界，取消下面这一行的注释，并取消底部的对应的花括号注释
+  \resizebox{\columnwidth}{!}{%
+  \begin{tabular}{lcll}
+    \toprule
+    Dataset & Stocks & Period & Data Type \\
+    \midrule
+    ACL18 & 87 & 2014-01-02 $\sim$ 2015-12-30 & Twitter + Price \\
+    CIKM18 & 38 & 2017-01-01 $\sim$ 2017-12-28 & Twitter + Price \\
+    BIGDATA22 & 50 & 2019-07-05 $\sim$ 2020-06-30 & Twitter + Price \\
+    CMIN-US & 110 & 2018-01-01 $\sim$ 2021-12-31 & Yahoo Finance News + Price \\
+    CMIN-CN & 300 & 2018-01-01 $\sim$ 2021-12-31 & Wind News + Price \\
+    BSE & 269 & 2022-01 $\sim$ 2025-09 & Wind News + Price \\
+    \bottomrule
+  \end{tabular}
+  } % 对应上面的 resizebox
+\end{table}
+
+\subsection{基准方法}
+为了全面评估CaGNet在不同维度下的表现，本文选取了六种具有代表性的主流基准模型进行对比实验，涵盖了从传统时序分析到最新的因果增强及大语言模型方案：
+\begin{enumerate}
+\item \textbf{MSGNet} [29]是一种结合频域分析与自适应图卷积的深度学习模型，在高维复杂时间序列预测任务中展现出优异性能，代表了当前时序预测的SOTA水平。
+\item \textbf{StockNet} [26]是多模态股票预测的开山之作，结合了社交媒体文本（Twitter）数据和历史价格预测股票涨跌的方法，是验证新闻驱动有效性的基线模型。
+\item \textbf{CMIN} [16]，通过Transfer Entropy构建因果增强的多股票关联，结合了因果关系指导价格特征股票走势预测方法。
+\item \textbf{CausalStock} [6]提出基于滞后依赖的时序因果发现机制，以端到端方式挖掘新闻驱动的多股票因果关系，是一种融合了因果关系多模态股价走势预测模型。
+\item \textbf{MagicNet} [25]一种改进的结合文本记忆和因果交互图的模型，通过捕捉股票之间的交互影响，实现更高精度的股票涨跌预测。
+\end{enumerate}
+
+\subsection{实验结果}
+\subsubsection{评价指标}
+我们沿用股票走势评估的两个评价指标，包括：
+\begin{itemize}
+\item \textbf{Accuracy (ACC)}：预测正确率；
+\begin{equation}
+\text{Acc} = \frac{tp + tn}{tp + tn + fp + fn}
+\end{equation}
+\item \textbf{Matthews Correlation Coefficient (MCC)}：衡量模型分类相关性的综合指标；
+\begin{equation}
+\text{MCC} = \frac{tp \times tn - fp \times fn}{\sqrt{(tp + fp)(fn + tp)(fn + tn)(fp + tn)}}
+\end{equation}
+\end{itemize}
+
+\subsubsection{参数设置和实现细节}
+在本研究的实验中，我们在多个公开的股票市场数据集以及我们的自建数据集北京证券交易所（BSE）数据集上对所提出的方法进行了验证。每条股票数据按日度采样，形成日度样本序列。数据按照时间顺序划分为训练集、验证集和测试集，比例约为7:1:2。
+
+在特征预处理阶段，价格序列采用价格变动率（Movement）计算，即当日收盘价与开盘价的相对变动率（Movement = (Close - Open) / Open），并进行标准化操作；文本信息经由预训练的词向量模型GloVe（Glove Twitter 27B）编码为50维稠密向量。若无特殊说明，滑动窗口长度设为$L=5$，预测步长为1日。对于多股票情形，我们依据行业分类（包括信息技术、工业、医疗保健、材料等类别）构建了股票分组策略，并通过Granger因果检验方法动态发现股票间的因果关系，构建因果矩阵用于捕捉跨股票的结构依赖。因果发现模块采用滑动窗口机制，窗口大小为30天，步长为5天，最大滞后阶数为5，显著性水平设为0.05。
+
+模型训练采用Adam优化器，初始学习率设为$1 \times 10^{-3}$，批量大小为32，训练轮次为15轮。所有模型均在相同的数据划分与超参数搜索范围下进行训练，以确保比较的公平性。训练过程中使用早停策略，并在验证集上选取表现最佳的模型参数。学习率采用指数衰减策略，衰减率为0.96，梯度裁剪阈值设为15.0，以防止训练过程中的梯度爆炸问题。
+
+所有实验均在单台GTX 4090 GPU环境下完成。
+
+\begin{table*}[htbp]
+  \centering
+  \caption{六个数据集上不同模型的实验结果比较}
+  \label{tab:main_results}
+  \resizebox{\textwidth}{!}{%
+    \begin{tabular}{lcccccccccccc}
+      \toprule
+      模型 & \multicolumn{2}{c}{ACL18} & \multicolumn{2}{c}{CMIN-US} & \multicolumn{2}{c}{CMIN-CN} & \multicolumn{2}{c}{CIKM18} & \multicolumn{2}{c}{BIGDATA22} & \multicolumn{2}{c}{BSE} \\
+      \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9} \cmidrule(lr){10-11} \cmidrule(lr){12-13}
+       & ACC & MCC & ACC & MCC & ACC & MCC & ACC & MCC & ACC & MCC & ACC & MCC \\
+      \midrule
+      MSGNet      & 49.05 & 0.089 & 50.01 & 0.001 & 49.87 & -0.002 & 50.32 & 0.006 & 49.70 & \textbf{-0.006} & 49.93 & \textbf{-0.002} \\
+      StockNet    & 58.23 & 0.081 & 51.64 & 0.006 & 53.35 & 0.023  & 52.35 & -0.016 & 52.99 & -0.016 & 50.99 & -0.017 \\
+      CMIN        & 62.29 & 0.209 & 53.43 & 0.046 & 55.28 & 0.111  & 53.10 & 0.004 & 54.52 & -0.023 & 53.12 & -0.006 \\
+      CausalStock & \textbf{63.42} & 0.217 & \underline{54.64} & 0.048 & \underline{56.19} & \textbf{0.142} & \underline{53.82} & 0.002 & 54.30 & -0.018 & \underline{53.25} & -0.003 \\
+      MagicNet    & \underline{63.21} & \textbf{0.218} & 54.22 & \textbf{0.049} & 55.53 & \underline{0.126} & 52.94 & 0.005 & \underline{55.28} & -0.013 & 53.19 & -0.005 \\
+      \midrule
+      CaGNet      & 58.41 & 0.137 & \textbf{57.04} & -0.0318 & \textbf{57.14} & -0.047 & \textbf{57.44} & \textbf{0.008} & \textbf{56.65} & -0.036 & \textbf{57.44} & -0.013 \\
+      \bottomrule
+    \end{tabular}%
+  }
+\end{table*}
+
+从表 \ref{tab:main_results} 的结果上来看，CaGNet在CIKM18、BIGDATA22 、CMIN以及自建的 BSE 数据集上ACC指标均显著优于基线模型，表明该方法在不同市场和数据分布条件下具有良好的泛化能力。
+在MCC 指标上，尽管 CaGNet 并非在所有数据集上均取得最优结果，但其整体表现仍保持稳定且具有竞争力，说明模型在提升预测准确率的同时，并未显著牺牲对类别不平衡问题的鲁棒性。综合来看，实验结果验证了 CaGNet 在提升预测准确率和保持分类稳定性方面的出色表现。
+
+\subsection{效率分析}
+传统的方法计算一次因果关系，需要$O(N^2 T)$，其中$n$是时间序列的数量，$T$是时间窗口长度。当我们采用了分组策略，即每组$n_g$个变量，一共$G$组，则求解一次因果图的计算复杂度降为$O(G \cdot n_g^2)$，由于$G \cdot n_g=N$，则最终的复杂度表示是$O(G \cdot n_g^2 T)$。
+
+我们通过实验也可以证明这一点，以BSE数据集为例，当时间窗口长度不变，增大股票的数量，则构造因果图的耗时将按照平方级增加，如图 \ref{fig:Efficiency experiment} (a) 所示。当股票数目保持不变，但是增大因果发现的时间窗口，则构造因果图的耗时按照线性增长。由于固定计算开销的存在，速度增长并非按照同等倍数扩增，但保持线性增长，这是合理的。
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{img/4to1.pdf}
+    \caption{效率与参数敏感性分析。(a) 运行时间随股票数量 $N$ 呈二次增长。(b) 运行时间随因果窗口大小呈线性增长。(c) 运行时间随分组数量 $K$ 增加而减少。(d) 加速比随分组数量 $K$ 增加而增加。}
+    \label{fig:Efficiency experiment}
+\end{figure}
+
+分组数和运行效率的探究，如图 \ref{fig:Efficiency experiment} (c) 的结果表明采用更细粒度的分组策略可以显著降低模型的总运行时间。随着分组数从1（不分组）增加到较小的数值，模型运行时间急剧下降。这表明分组因果计算策略在初始引入时极大地缓解了因果模块的计算负担，使多股票因果推理的效率得到大幅提升。
+随着分组数量进一步增大，运行时间的下降幅度趋于平缓，呈现边际收益递减的现象。当因果模块的计算开销被大幅削减后，新闻模块和 VMD 模块等固定开销占据了主要时间成本，继续细分股票组别带来的效率增益将会逐步缩小。
+
+此外，我们对所提出的异步注意力机制中的时间掩码设计进行了系统分析，以验证引入时间注意力假设的合理性。该实验通过调整时间邻域大小，考察模型在不同时间窗口范围内对新闻与价格异步关联的建模能力。实验结果表明，若强制要求新闻与价格在时间上严格对齐，模型性能反而受限；相比之下，引入有限时间邻域内的自动对齐机制能够显著提升预测准确性。这一现象符合金融市场的实际特性，即新闻事件对价格的影响存在一定时间不一致性，并集中于相对局部的时间范围内。在 ACL18 数据集上，当时间邻域大小设置为 4 时，模型取得了最佳性能（ACC 达到 58.41\%）（见图 \ref{fig:neighborhood}）。随着时间邻域的进一步扩大，模型性能逐渐下降，表明过大的时间窗口会引入噪声信息，从而削弱异步注意力机制的建模效果。
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{img/Figure_5.pdf}
+    \caption{ACL18数据集上测试集准确率与邻域大小的关系}
+    \label{fig:neighborhood}
+\end{figure}
+
+\subsection{消融实验}
+为了验证所提出的模型的有效性，我们创建了不同的模型变体，并做了如下的消融实验。
+一旦移除异步对齐注意力（w/o Async-Attn），模型在几乎所有数据集上的 ACC 与 MCC 均一致下降。具体而言，ACC 在不同数据集上的下降1.2\%–3.8\%，说明该机制在处理新闻与价格的时间错配方面发挥着关键作用。值得注意的是，这一性能差距在不同语言与市场环境下会表现得更为明显。这可能是不同市场下的新闻质量与分词粒度存在差异。例如，CMIN-CN 数据集采用逐字分词，使得文本语义相对稀疏；而我们构建的 BSE 中文新闻则基于词级水平分词，能够保留更完整的语义单元，从而显著影响模型对新闻特征的提取能力。新闻模块（w/o News）的退化实验也表明新闻的引入相比于完全不引入能够辅助性地提升模型预测的准确率。
+去除因果推断模块（w/o Causal）后，全体模型性能出现5\%-10\%的性能下降，表明因果知识对于股票间影响关系的路径表达具有重要价值。同时，分组因果策略（w/o Grouped-Causal）在速度上的优势比前者更显著，且预测效果的水平近乎一致，我们认为后者整体表现更优异。
+上述结果充分证明了“因果分组 + 异步对齐”这一设计在真实金融预判场景中的有效性与必要性。
+
+\begin{table*}[htbp]
+  \centering
+  \caption{六个数据集上不同模型组件的消融研究}
+  \label{tab:ablation_merged}
+  \resizebox{\textwidth}{!}{%
+    \begin{tabular}{lcccccccccccc}
+      \toprule
+      模型 & \multicolumn{2}{c}{ACL18} & \multicolumn{2}{c}{CMIN-US} & \multicolumn{2}{c}{CMIN-CN} & \multicolumn{2}{c}{CIKM18} & \multicolumn{2}{c}{BIGDATA22} & \multicolumn{2}{c}{BSE} \\
+      \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9} \cmidrule(lr){10-11} \cmidrule(lr){12-13}
+       & ACC & MCC & ACC & MCC & ACC & MCC & ACC & MCC & ACC & MCC & ACC & MCC \\
+      \midrule
+      w/o Async-Attn      & 50.55 & -0.3250 & 56.50 & -0.0861 & 55.92 & -0.2818 & 53.47 & -0.3000 & 50.14 & -0.3294 & 51.66 & -0.3140 \\
+      w/o Causal          & 47.93 & -0.1733 & 48.14 & -0.1200 & 48.80 & -0.3423 & 52.14 & -0.2047 & 48.69 & -0.0892 & 46.06 & -0.2810 \\
+      w/o Grouped-Causal  & 58.34 & -0.1911 & \textbf{57.33} & -0.0832 & 57.11 & -0.2724 & 57.46 & -0.0550 & 54.70 & -0.2707 & 56.46 & -0.2696 \\
+      w/o News            & 53.98 & 0.0762  & 52.66 & \textbf{0.0272} & 53.72 & \textbf{0.0000} & 51.87 & -0.0365 & 48.30 & \textbf{-0.0002} & 50.55 & -0.4332 \\
+      \midrule
+      CaGNet              & \textbf{58.41} & \textbf{0.137} & 57.04 & -0.0318 & \textbf{57.14} & -0.047 & \textbf{57.44} & \textbf{0.0080} & \textbf{56.65} & -0.0361 & \textbf{57.44} & \textbf{-0.0133} \\
+      \bottomrule
+    \end{tabular}%
+  }
+\end{table*}
+
+\subsection{案例分析}
+本节给出一个示例，说明CaGNet如何同时考虑金融文本与股票关联。
+我们对BSE的因果矩阵进行了可视化（见图 \ref{fig:Heatmap} 的热力图）。股票按相关性分组排序。
+我们案例选取的目标股票为北京证券交易所的“富士达”，监测窗口为 2024-06-28-，从因果图中可以看出，相关度比较高的股票有：晶赛科技，铁大科技，和格利尔等，排名比较靠前的均为科技组别的公司。（2024-6-28只有178家股票有数据，另外22家还没上市）这说明同一板块的股票信息内部具有强Granger因果特性。
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{img/case-study.png}
+    \caption{BSE数据集上的因果热力图}
+    \label{fig:Heatmap}
+\end{figure}
+
+\section{结论}
+本文提出了一种异步新闻驱动的股票走势预测网络，能够解决新闻消息异质性对价格影响在时间上的不一致性的问题，并优化了结合因果关系对股票走势建模时间开销大的问题，在预测性能与计算效率之间取得了更优的平衡。我们通过自建数据集以及现有的五个数据集的大量实验表明，所提出的模型各个成分都具有相当程度的贡献，相比于现有的模型，进一步提高了预测准确率。未来工作包括结合进一步降低计算开销，实现分钟级股票数据和文本的股票走势实时预测等。
+
+\vspace{5mm}
+\bibliographystyle{unsrt}
+\bibliography{references}
+
+
+
+
+
+
+
+
+\begin{biography}[yourphotofilename.jpg]
+\noindent
+\textbf{First A. Author}\ \ *计算机学报第1作者提供照片电子图片，尺寸为1寸。英文作者介绍内容包括：出生年,学位(或目前学历),职称,主要研究领域(\textbf{与中文作者介绍中的研究方向一致}).*
+*字体为小5号Times New Roman*
+
+\end{biography}
+
+\begin{biography}[yourphotofilename.jpg]
+\noindent
+\textbf{Second B. Author} *英文作者介绍内容包括：出生年,学位(或目前学历),职称,主要研究领域(\textbf{与中文作者介绍中的研究方向一致})。*
+*字体为小5号Times New Roman*
+\end{biography}
+\par
+\zihao{5}
+\noindent \textbf{Background}
+
+\zihao{5-}{
+\setlength\parindent{2em}
+*论文背景介绍为\textbf{英文}，字体为小5号Times New Roman体*
+
+论文后面为400单词左右的英文背景介绍。介绍的内容包括：
+
+本文研究的问题属于哪一个领域的什么问题。该类问题目前国际上解决到什么程度。
+
+本文将问题解决到什么程度。
+
+课题所属的项目。
+
+项目的意义。
+
+本研究群体以往在这个方向上的研究成果。
+
+本文的成果是解决大课题中的哪一部分，如果涉及863$\backslash $973以及其项目、基金、研究计划，注意这些项目的英文名称应书写正确。}
+
+ 
+\end{document}
+
+
