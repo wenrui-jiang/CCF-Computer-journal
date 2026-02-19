@@ -206,10 +206,14 @@ TP \rm{\quad \quad \quad     }
 
 尽管现有研究已从新闻驱动建模和因果关系建模等角度对股票预测问题进行了大量探索，但是据我们所知，目前尚未有工作探究新闻方向性约束以及大规模因果计算效率优化。在接下来的部分中，本文将描述新闻双向驱动器和因果分组框策略是如何设计的，并探讨它们的优势。
 
+\heiti 
+\zihao{5}
+\vskip 1mm
 \section{方法}
-本章将详细介绍CaGNet的整体结构与关键组成模块的设计与实现细节。作为一种统一的端到端预测模型，CaGNet通过多模态并行建模、因果关系增强以及跨模态交互机制，刻画了新闻与价格序列之间的复杂依赖关系。
+\songti
+本章将详细介绍CaGNet的整体结构与关键组成模块的设计与实现细节。作为一种统一的端到端预测模型，CaGNet通过多模态并行建模、因果增强网络以及跨模态交互机制，刻画了新闻与价格序列之间的复杂依赖关系。
 
-\subsection{总体模型结构}
+{\heiti \subsection{总体模型结构} }
 CaGNet的总体架构如图\ref{fig:modeloverview}所示，主要由三个模块组成，分别是文本价格双流嵌入网络，因果增强网络，新闻双向驱动器。
 
 双流嵌入网络并行编码新闻文本和价格序列，将多模态信息映射至统一的潜在语义空间，为后续处理提供基础特征。
@@ -225,7 +229,7 @@ CaGNet的总体架构如图\ref{fig:modeloverview}所示，主要由三个模块
     \label{fig:modeloverview}
 \end{figure*}
 
-\subsection{双流嵌入网络}
+{\heiti \subsection{双流嵌入网络} }
 
 \subsubsection{文本处理}
 双流嵌入网络将文本和价格分别嵌入到独立的向量空间中，形成文本向量与价格向量。该网络接受文本数据$W \in \mathbb{R}^{B \times T \times M \times L}$作为输入，其中$B$表示批量大小，$T$表示交易日数（不同股票的交易日数有所不同，需要考虑休市、停牌以及上市时间不同等情况），$M$表示每个交易日输入的新闻条数，$L$表示每条消息最多包含的词数。随后我们使用一个词嵌入层将离散的词索引映射到连续向量空间。嵌入层采用预训练的GloVe\cite{pennington2014glove}词嵌入矩阵进行初始化，并在端到端训练过程中进一步微调，其过程可以表示为：
@@ -235,12 +239,12 @@ CaGNet的总体架构如图\ref{fig:modeloverview}所示，主要由三个模块
 \end{equation}
 其中$d_w$为词向量维度，$M$代表当日接受多少条新闻作为输入。
 
-为了捕捉消息序列中前后文依赖关系，需要对词嵌入进一步处理得到消息嵌入。词向量通过双向门控循环单元（Bidirectional Gated Recurrent Unit, BiGRU）提取上下文依赖，生成单条消息嵌入$E_{msg}^{(t)}$：
+为了捕捉消息序列中前后文依赖关系，需要对词嵌入进一步处理得到消息嵌入。词向量通过双向门控循环单元（Bidirectional Gated Recurrent Unit, BiGRU）提取上下文依赖，生成单条消息嵌入$E_{msg}$：
 \begin{equation}
 \begin{split}
-  \mathbf{h}_{fwd}^{(t)} &= \operatorname{GRU}_{fwd}(E_{word}^{(t)}) \\
-  \mathbf{h}_{bwd}^{(t)} &= \operatorname{GRU}_{bwd}(\operatorname{flip}(E_{word}^{(t)})) \\
-  E_{msg}^{(t)} &= \frac{\mathbf{h}_{fwd}^{(t)} + \mathbf{h}_{bwd}^{(t)}}{2} \in \mathbb{R}^{B \times L \times M \times d_m}
+  \mathbf{h}_{fwd} &= \operatorname{GRU}_{fwd}(E_{word}) \\
+  \mathbf{h}_{bwd} &= \operatorname{GRU}_{bwd}(\operatorname{flip}(E_{word})) \\
+  E_{msg} &= \frac{\mathbf{h}_{fwd} + \mathbf{h}_{bwd}}{2} \in \mathbb{R}^{B \times L \times M \times d_m}
 \end{split}
 \label{eq:bigru_encoding}
 \end{equation}
@@ -248,50 +252,61 @@ CaGNet的总体架构如图\ref{fig:modeloverview}所示，主要由三个模块
 
 考虑到单只股票在同一交易日内可能受到多条重要性不等的新闻冲击，对于第$t$天的所有新闻消息，我们利用消息级注意力对高维文本的嵌入特征进行加权聚合，突出当天新闻消息总体对股价走势的预测走向，这个过程表示为：
 \begin{equation}
-\begin{aligned}
-u_t &= w^\top \tanh(W M_{msg}) \\
-\alpha_t &= \text{softmax}(u_t) \\
-c_t &= M_{msg} \alpha_t^\top \\
-E'_{msg} &= \sum \alpha_t E_{msg}
-\end{aligned}
+\begin{split}
+  u_t &= \mathbf{w}^\top \tanh(\mathbf{W} E_{msg}) \\
+  \alpha_t &= \operatorname{softmax}(u_t) \\
+  E'_{msg} &= \sum \alpha_t E_{msg}
+\end{split}
+\label{eq:attention_aggregation}
 \end{equation}
 聚合后的$E'_{msg} \in \mathbb{R}^{B \times T \times d}$作为日级新闻语义表示，并输入后续模块与价格特征进行融合。
 
 \subsubsection{特征拼接}
 输入的价格数据$P \in \mathbb{R}^{T \times 7}$，包括开盘价、最高价、最低价、收盘价、调整收盘价、成交量。经过归一化处理后，保留开盘价，最高价和调整收盘价三个维度，并对价格特征进行映射，获得其潜在空间表示用于与新闻语义向量融合：
 \begin{equation}
-\begin{aligned}
-P &= [p_1, p_2, \dots, p_T] \in \mathbb{R}^{T \times 6} \\
-P' &= \text{Linear}(P) \in \mathbb{R}^{T \times d_2}
-\end{aligned}
+\begin{split}
+  P &= [p_1, p_2, ..., p_T] \in \mathbb{R}^{B \times T \times 3} \\
+  P' &= \operatorname{Linear}(P) \in \mathbb{R}^{B \times T \times d_p}
+\end{split}
+\label{eq:price_processing}
 \end{equation}
 为了体现市场的联合特征，我们将新闻语料的嵌入向量，和价格时间序列的潜空间表示，在特征维度进行简单拼接：
 \begin{equation}
-X = [E_{msg}; P'], \quad X \in \mathbb{R}^{T \times (d + d_2)}
+  X = [E'_{msg}; P'], \quad X \in \mathbb{R}^{B \times T \times (d + d_p)}
+  \label{eq:feature_fusion}
 \end{equation}
 联合特征$X$用于后续的变分运动解码，以捕获跨模态的时序依赖关系。
 
 \subsubsection{变分运动网络}
 为了在后续的异步注意力机制中准确建模多模态特征，我们使用变分运动网络对先前的联合时间序列$X$构建隐变量特征，便于后续多模态特征对齐。
-设输入序列为$X = [x_1, x_2, \dots, x_T]$，采用LSTM网络或者GRU网络将观测序列映射到隐变量
+设输入序列为$X = [x_1, x_2, \dots, x_T]$，采用GRU网络将观测序列映射到隐变量
 \begin{equation}
-h_t = f(x_t, h_{t-1})
+  h_t = \operatorname{GRU}(x_t, h_{t-1})
+  \label{eq:hidden_state_mapping}
 \end{equation}
 引入变分推断结构，对每个$h_t$估计一个高斯分布：
 \begin{equation}
-z_t \sim \mathcal{N}(\mu_t, \sigma_t^2)
+\begin{split}
+  \mu_t &= \mathbf{W}_\mu h_t + \mathbf{b}_\mu \\
+  \log \sigma_t^2 &= \mathbf{W}_\sigma h_t + \mathbf{b}_\sigma \\
+  z_t \sim \mathcal{N}(\mu_t, \sigma_t^2)
+\end{split}
+\label{eq:gaussian_distribution}
 \end{equation}
-通过重参数采样，生成潜在的运动特征$g_t$
+通过重参数采样，
 \begin{equation}
-\begin{aligned}
-z_t &= \mu_t + \sigma_t \epsilon_t \\
-g_t &= \tanh(\text{Linear}([h_t, z_t]))
-\end{aligned}
+  z_t = \mu_t + \sigma_t \odot \epsilon_t, \quad \epsilon_t \sim \mathcal{N}(0, \mathbf{I})
+  \label{eq:reparameterization}
 \end{equation}
-其中$\epsilon_t \sim \mathcal{N}(0, I)$得到连续隐空间表示。
+最后，通过融合确定性状态$h_t$和随机变量$z_t$生成潜在的运动特征$E_{mot}^{(t)}$：
+\begin{equation}
+  E_{mot}^{(t)} = \tanh(\mathbf{W}_o [h_t; z_t] + \mathbf{b}_o) 
+  \label{eq:motion_feature}
+\end{equation}
+完整的运动特征序列表示为$E_{mot} \in \mathbb{R}^{B \times T \times d_{mot}}$。
 
 
-\subsection{因果增强网络}
+{\heiti \subsection{因果增强网络} }
 在金融市场中，单个股票的波动往往并非孤立事件，而是受到跨股票因果溢出效应（Causal Spillover Effects）的驱动。然而，对全量股票构建动态因果网络面临巨大的计算挑战。为此，本章提出因果增强网络（Causal-Enhanced Network），旨在通过层次化的因果分组发现策略，在大幅降低计算开销的同时，提取因果表征，并将其注入后续的预测框架中。
 
 \begin{figure*}
@@ -304,22 +319,23 @@ g_t &= \tanh(\text{Linear}([h_t, z_t]))
 \subsubsection{分组策略}
 受到“先局部，后整体”的优化思想的启发，我们提出了基于分组融合的因果发现策略。针对全量股票构建动态因果网络通常面临$O(N^2)$级别的计算开销，而通过分组策略，能够大幅降低因果发现的计算复杂度，并给高频的动态因果关系更新提供了可能。
 
-股票市场本身有板块和市场的概念，一种方法是在模型训练之前，提前准备股票所在板块的先验信息，例如：苹果公司（AAPL）属于科技股。另一种方法是根据收益率相关性进行分组，具体的策略是：对于输入的股票价格数据$P$，以股票价格收益率构建相关性分组，进行层次聚类（Hierarchical Clustering, HC）得到彼此独立的分组。
+股票市场本身有板块和市场的概念，一种方法是在模型训练之前，提前准备股票所在板块的先验信息，例如：苹果公司（AAPL）属于科技股。另一种方法是根据收益率相关性进行分组。
+令 $P_{all} \in \mathbb{R}^{N \times T_{hist}}$ 表示全量 $N$ 只股票的历史价格序列。我们首先计算其收益率的相关性矩阵：
 \begin{equation}
-\begin{aligned}
-R &= \text{corr}(\Delta P) \in \mathbb{R}^{N \times N} \\
-G &= \text{HC}(R, C) \in \mathbb{R}^N
-\end{aligned}
+  R = \operatorname{corr}(\Delta P_{all}) \in \mathbb{R}^{N \times N}
+  \label{eq:correlation_matrix}
 \end{equation}
-其中，$\Delta P$表示收益率，$R$表示股票间的相关性矩阵，$C$表示分组数量，$G$表示每个股票对应的组别编号。
+随后，我们在 $R$ 上应用层次聚类（Hierarchical Clustering, HC）将股票划分为 $K$ 个不同的组。我们将这种划分形式化为一个二元组成员矩阵 $G \in \{0, 1\}^{K \times N}$：
+\begin{equation}
+  G_{k,i} = \begin{cases} 
+    1, & \text{如果股票 } i \text{ 被分配到组 } k \\ 
+    0, & \text{否则} 
+  \end{cases}
+  \label{eq:grouping_matrix}
+\end{equation}
+其中每只股票恰好属于一个组。
 
 在本研究中，股票分组基于全样本阶段的收益率相关性计算得到，用于反映股票间长期的相关性特征。这种全样本分组方法捕捉的是行业属性、风险暴露及市场风格等不随短期波动而剧烈变化的结构性特征，作为一种先验结构被引入，用于构建股票间的图结构与因果关系约束。该相关性计算结果并未直接参与预测阶段的特征更新，而是提供了一个全局稳定的结构参考。若应用于在线预测场景，则可采用滑动窗口计算相关性矩阵以避免潜在的数据泄露问题。
-
-设共有$C$个分组、$N$只股票，每只股票仅属于某一个分组，则分组情况以矩阵的形式记录为：
-\begin{equation}
-G = [g_{ki}] \in \{0, 1\}^{C \times N}
-\end{equation}
-其中如果第$i$支股票属于第$k$个组，则$g_{ki} = 1$。
 
 \subsubsection{动态因果计算}
 在股票系统中，不同股票之间的依赖关系往往会随时间变化而变化，因此需采用动态因果计算的方式。但动态因果计算方式这也带来更高的计算开销。为了刻画股票数据在不同时间尺度下的特征，得益于先前的分组策略，我们使用层次化因果近似全量因果关系。
@@ -337,18 +353,22 @@ Y_t &= \sum_{k=1}^p c_k X_{t-k} + \sum_{k=1}^p d_k Y_{t-k} + \eta_t
 \end{equation}
 则说明$Y$对$X$在该时间段存在因果贡献。
 
-基于预测误差的降低幅度，可以构造连续型Granger因果强度指标：
+For any pair of stocks $(X, Y)$ within the same group, we calculate the Granger causality intensity based on:
 \begin{equation}
-G_{Y \to X} = \frac{\sigma^2 (X \mid X_{\text{past}}) - \sigma^2 (X \mid X_{\text{past}}, Y_{\text{past}})}{\sigma^2 (X \mid X_{\text{past}})}
+  \mathcal{I}_{Y \to X} = \frac{\sigma^2(X \mid X_{past}) - \sigma^2(X \mid X_{past}, Y_{past})}{\sigma^2(X \mid X_{past})}
+  \label{eq:granger_intensity}
 \end{equation}
-$G$取值范围为$[0, 1]$，表示因果影响程度。
+where the value of $\mathcal{I}$ lies within the range $[0, 1]$, representing the intensity of causal influence, $\sigma^2$ denotes the variance of the prediction residuals.
 
-本文在每个滑动窗口中，对同组内所有股票对$(i, j)$计算局部Granger因果强度$G$，构造分块对角矩阵，并最终得出组内因果强度矩阵$A_{\text{intra}}$：
+本文在每个滑动窗口中，首先对每个分组 $k$ 内的所有股票对 $(i, j)$ 计算局部 Granger 因果强度，构建组内因果邻接矩阵 $A_k \in \mathbb{R}^{N_k \times N_k}$，其中 $N_k$ 为组内股票数量：
 \begin{equation}
-\begin{aligned}
-G_t &= G(x_i, x_j; t) \\
-A_{\text{intra}} &= \text{diag}(G_t^{(1)}, G_t^{(2)}, \dots, G_t^{(C)}) \in \mathbb{R}^{N \times N}
-\end{aligned}
+  A_k^{(i,j)} = \mathcal{I}_{j \to i}, \quad \forall i, j \in \text{Group } k
+  \label{eq:subgraph_construction}
+\end{equation}
+随后，我们将各组的局部矩阵整合，构造全量的分块对角矩阵 $A_{intra} \in \mathbb{R}^{N \times N}$：
+\begin{equation}
+  A_{intra} = \operatorname{Diag}(A_1, A_2, \dots, A_K) 
+  \label{eq:intra_group_matrix}
 \end{equation}
 其中，$t$表示在以时间$t$为末尾，窗口大小为$l$的局部窗口。
 
@@ -365,35 +385,43 @@ q_{kl} &= G(x_{i(k,l)}, x_{j(k,l)}; t) \\
 Q &= [q_{kl}] \in \mathbb{R}^{C \times C}
 \end{aligned}
 \end{equation}
-组间的宏观因果信息需要向微观股票进行传递。我们认为，股票和股票的因果关系需要继承组间因果关系。因此，模型使用隶属度矩阵$G$将组间关系广播至全量空间，最终构建全量动态因果图$\tilde{M}$：
+组间的宏观因果信息需要向微观股票进行传递。我们认为，股票和股票的因果关系需要继承组间因果关系。因此，模型使用隶属度矩阵$G$将组间关系广播至全量空间，最终构建全量动态因果图$\tilde{A}$：
 \begin{equation}
-\tilde{M} = A_{\text{intra}} + \lambda (G^\top Q G) \in \mathbb{R}^{N \times N}
+  \tilde{A} = A_{\text{intra}} + \lambda (G^\top Q G) \in \mathbb{R}^{N \times N}
 \end{equation}
 上述过程中，由于每对分组仅需一次Granger测试，当分组数量$C$远小于股票数量$N$时，这种近似策略能够显著减少总体计算量。上述步骤会在所有滑动窗口上重复执行，从而得到一段时间内的因果图序列。
 
 \subsubsection{因果特征提取}
-为了将推断得到的动态因果图$\tilde{M}$有效整合至预测框架中，需将其从高维拓扑表示转换为适合深度神经网络处理的低维连续向量。对任意股票$i$，其在市场中的因果角色可由其对其他股票的施加影响与受其他股票的被动影响共同刻画。具体而言，我们取出$\tilde{M}_{i,:}^{(t)}$第$i$行表示股票$i$对其他股票的影响，以及$\tilde{M}_{:,i}^{(t)}$第$i$列表示其他股票对股票$i$的影响，通过链接操作，构建一个长度为$2N$的局部因果向量$c_i^{(t)}$
+为了将推断得到的动态因果图$\tilde{A}$有效整合至预测框架中，需将其从高维拓扑表示转换为适合深度神经网络处理的低维连续向量。对任意股票$i$，其在市场中的因果角色可由其对其他股票的施加影响与受其他股票的被动影响共同刻画。具体而言，我们取出$\tilde{A}_{i,:}$第$i$行表示股票$i$对其他股票的影响，以及$\tilde{A}_{:,i}$第$i$列表示其他股票对股票$i$的影响，通过链接操作，构建一个长度为$2N$的局部因果向量$v_{i}$：
 \begin{equation}
-c_i^{(t)} = f([\tilde{M}_{i,:}^{(t)}; \quad \tilde{M}_{:,i}^{(t)}])
+  v_{i} = [\tilde{A}_{i, :}, \tilde{A}_{:, i}^\top]
+  \label{eq:causal_raw_extraction}
 \end{equation}
-由于原始因果矩阵有较高的维度与稀疏性，直接使用全量信息会显著增加模型复杂度，并可能导致过拟合。我们在此进行嵌入化处理，压缩成固定维度$d_c$的特征向量$c_i^{(t)}$，在保持模型整体拓扑关系的同时，兼具计算效率和泛化能力，为后续联合预测提供合适的数据形式。最终得到的因果特征形式如$c = [c_1, c_2, \dots, c_n]$。
+由于原始因果矩阵有较高的维度与稀疏性，直接使用全量信息会显著增加模型复杂度，并可能导致过拟合。我们在此进行嵌入化处理，压缩成固定维度$d_c$的特征向量$E_{causal}$：
+\begin{equation}
+  E_{causal} = \tanh(\mathbf{W}_c v_{i} + \mathbf{b}_c)
+  \label{eq:causal_embedding}
+\end{equation}
+where $\mathbf{W}_c \in \mathbb{R}^{d_c \times 2N}$ is the projection matrix. The resulting $E_{causal}$ serves as the static structural embedding for the current window.
+在保持模型整体拓扑关系的同时，兼具计算效率和泛化能力，为后续联合预测提供合适的数据形式。
 
-学习到的因果特征$c$被注入到3.4节的异步注意力机制中：
+学习到的因果特征$E_{causal}$被注入到3.4节的异步注意力机制中：
 \begin{equation}
-V = [P', c] W_v
+  V = [P', E_{causal}] W_v
 \end{equation}
-\subsection{新闻双向驱动器}
+{\heiti \subsection{新闻双向驱动器} }
 与以往直接拼接多模态特征的方法不同，本研究在多模态融合时引入了一个新闻双向驱动器（Bidirectional News Driver, BiND），一种注意力机制的异步对齐方法。由于新闻具有异质性的特点，新闻信息和价格变化在时间上并不完全匹配。然而传统的预测模型假定新闻领先于价格波动，这些方法将“滞后解释”理解成“预测信号”，从而引入冗余噪声。因此，我们设计了该模块，使模型能够在动态窗口内自适应地匹配新闻特征与价格波动。
 
 在注意力机制框架下，我们将新闻特征映射为查询向量（Query），将历史价格特征映射为键向量（Key）与值向量（Value）。注意力公式如下：
 \begin{equation}
 \begin{aligned}
-Q &= X' W_q \\
-K &= P' W_k \\
-V &= P' W_v
+  Q &= X \mathbf{W}_q \\
+  K &= P' \mathbf{W}_k \\
+  V &= [P'; E_{causal}] \mathbf{W}_v
 \end{aligned}
+\label{eq:attention_projections}
 \end{equation}
-其中$W_q, W_k, W_v$为可学习参数矩阵。在因果增强模式下，$V = [P', c] W_v$。
+where $\mathbf{W}_q \in \mathbb{R}^{(d_m+d_p) \times d_a}$, $\mathbf{W}_k \in \mathbb{R}^{d_p \times d_a}$, and $\mathbf{W}_v \in \mathbb{R}^{(d_p+d_c) \times d_v}$ are learnable parameter matrices. 
 
 注意力得分矩阵$S$体现不同时刻新闻对股价变动的时间相关性，其计算公式为：
 \begin{equation}
@@ -404,18 +432,24 @@ S = \frac{QK^\top}{\sqrt{d_a}}
 
 值得注意的是，在推理预测和测试阶段，由于现实世界不可能预知未来新闻，我们改变我们的参数使得$\tau_n = 0$。这样新闻仅保留过去的窗口，从而避免数据泄露。掩码部分的公式可以表示为：
 \begin{equation}
-M_{b,i,j} = \begin{cases} 1, & j \in [i - \tau_p, i + \tau_n] \\ 0, & \text{otherwise} \end{cases}
+  M_{t, k} = \begin{cases} 
+    0, & \text{if } k \in [t - \tau_p, t + \tau_n] \\ 
+    -\infty, & \text{otherwise} 
+  \end{cases}
+  \label{eq:mask_definition}
 \end{equation}
-其中，$M$表示掩码，$b$表示样本数，$i$是当前时间步，$j$是被关注时间步，$\tau_p$是允许回看的最大天数，$\tau_n$是允许前看的最大天数。
+其中，$M$表示掩码，$t$是当前时间步，$k$是被关注时间步，$\tau_p$是允许回看的最大天数，$\tau_n$是允许前看的最大天数。
 
 该机制不仅自动学习“哪些新闻是相关的”，“哪些特征是冗余的”，还通过掩码约束了“哪些时间点的新闻是合法可用的”，从而保证了因果顺序和时间逻辑的合理性。
 
-当$M_{b,i,j} = 0$时，对应位置的注意力分数$S_{i,j}$会被置为$-\infty$，从而在Softmax后归零；通过掩码后的注意力权重与残差连接，我们得到对齐后的新闻表征：
+通过掩码后的注意力权重与残差连接，我们得到对齐后的新闻表征：
 \begin{equation}
-E_{msg}^{\text{aligned}} = \text{Linear}(\text{Softmax}(\text{Mask}(S, M))V + E_{msg})
+  E_{aligned}^{(t)} = \mathbf{W}_o \left( \operatorname{Softmax}(S + M) V \right) + E'_{msg, t}
+  \label{eq:aligned_representation}
 \end{equation}
+where $\mathbf{W}_o$ is a learnable output projection matrix. The resulting vector $E_{aligned} \in \mathbb{R}^{B \times T \times d_m}$ encapsulates the news semantics enriched by aligned market dynamics.
 
-\subsection{解码预测层}
+{\heiti \subsection{解码预测层} }
 在获取跨模态的表征后，模型需对多源信号进行集成以实现最终预测。我们将反映价格序列趋势的运动特征$g_t \in \mathbb{R}^{d_g}$与异步融合特征$E_{msg}^{\text{aligned}}$和因果特征$c$进行级联，形成统一的向量表示$z_t = [g_t; E_{msg}^{\text{aligned}}; c]$。
 
 融合后的特征经由一层线性映射与非线性激活函数进行变换：
@@ -427,7 +461,7 @@ E_{msg}^{\text{aligned}} = \text{Linear}(\text{Softmax}(\text{Mask}(S, M))V + E_
 \hat{y}_t = \text{Softmax}(W_y \tilde{z}_t + b_y)
 \end{equation}
 
-\subsection{训练目标}
+{\heiti \subsection{训练目标} }
 我们的训练目标是最小化一个由分类损失和变分约束构成的复合损失函数。分类损失旨在衡量预测的标签和真实标签之间的差异：对于预测时刻$T$，采用交叉熵损失来衡量预测分布$\hat{y}_T$与真实分布$y_T$之间的差异，其中，$\hat{y}_T$是预测标签，$y_T$是真实标签，
 \begin{equation}
 L_T = -y_T^\top \log \hat{y}_T
